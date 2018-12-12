@@ -8,6 +8,7 @@ export PVS=${INTERACTIVE:="true"}
 export DOMAIN=${DOMAIN:="$(curl -s ipinfo.io/ip).nip.io"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=password}
+export EMAIL=${EMAIL:=admin@email.com}
 export VERSION=${VERSION:="3.11"}
 export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/chamilton614/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
@@ -28,6 +29,11 @@ if [ "$INTERACTIVE" = "true" ]; then
 	read -rp "Password: ($PASSWORD): " choice;
 	if [ "$choice" != "" ] ; then
 		export PASSWORD="$choice";
+	fi
+	
+	read -rp "Email: ($EMAIL): " choice;
+	if [ "$choice" != "" ] ; then
+		export EMAIL="$choice";
 	fi
 
 	read -rp "OpenShift Version: ($VERSION): " choice;
@@ -53,6 +59,7 @@ echo "* Your domain is $DOMAIN "
 echo "* Your IP is $IP "
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
+echo "* Your email is $EMAIL "
 echo "* OpenShift version: $VERSION "
 echo "******"
 
@@ -70,6 +77,12 @@ yum install -y  wget git zile nano net-tools docker-1.13.1\
 
 #install epel
 yum -y install epel-release
+
+# Install Certbot
+yum install -y certbot
+
+#Generate SSL Cert
+certbot certonly --standalone -d console.$DOMAIN -d apps.$DOMAIN -n --agree-tos -m ${EMAIL}
 
 # Disable the EPEL repository globally so that is not accidentally used during later steps of the installation
 sed -i -e "s/^enabled=1/enabled=0/" /etc/yum.repos.d/epel.repo
@@ -185,10 +198,17 @@ if [ "$PVS" = "true" ]; then
 	rm oc_vol.yaml
 fi
 
+# Enable the EPEL repository globally
+sed -i -e "s/^enabled=0/enabled=1/" /etc/yum.repos.d/epel.repo
+
+# Install Certbot
+#yum install -y certbot
+
 echo "******"
 echo "* Your console is https://console.$DOMAIN:$API_PORT"
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
+echo "* Your email is $EMAIL "
 echo "*"
 echo "* Login using:"
 echo "*"
@@ -196,3 +216,14 @@ echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT
 echo "******"
 
 oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
+
+#Use the Default Project
+#oc project default
+#Scale the Router to 0
+#oc scale --replicas=0 dc router
+#Generate SSL Cert
+#certbot certonly --standalone -d console.$DOMAIN -d apps.$DOMAIN -n --agree-tos -m ${EMAIL}
+
+
+
+
