@@ -8,8 +8,8 @@ export PVS=${INTERACTIVE:="true"}
 export DOMAIN=${DOMAIN:="$(curl -s ipinfo.io/ip).nip.io"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=password}
-export VERSION=${VERSION:="3.11"}
-export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
+export VERSION=${VERSION:="3.11.54"}
+export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/chamilton614/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
 
@@ -132,7 +132,12 @@ if [ "$memory" -lt "4194304" ]; then
 	export METRICS="False"
 fi
 
-if [ "$memory" -lt "16777216" ]; then
+#if [ "$memory" -lt "16777216" ]; then
+#	export LOGGING="False"
+#fi
+
+#Updated to use 16200000 to force install logging
+if [ "$memory" -lt "16200000" ]; then
 	export LOGGING="False"
 fi
 
