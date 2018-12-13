@@ -79,11 +79,11 @@ yum install -y  wget git zile nano net-tools docker-1.13.1\
 yum -y install epel-release
 
 # Install Certbot
-yum install -y certbot
+#yum install -y certbot
 
 #Generate SSL Cert
 #certbot certonly --standalone -d console.$DOMAIN,apps.$DOMAIN -n --agree-tos -m $EMAIL
-certbot certonly --standalone -d $DOMAIN,console.$DOMAIN,console.apps.$DOMAIN,apps.$DOMAIN,hawkular-metrics.apps.$DOMAIN,grafana-openshift-monitoring.apps.$DOMAIN,alertmanager-main-openshift-monitoring.apps.$DOMAIN,prometheus-k8s-openshift-monitoring.apps.$DOMAIN -n --agree-tos -m $EMAIL
+#certbot certonly --standalone -d $DOMAIN,console.$DOMAIN,console.apps.$DOMAIN,apps.$DOMAIN,hawkular-metrics.apps.$DOMAIN,grafana-openshift-monitoring.apps.$DOMAIN,alertmanager-main-openshift-monitoring.apps.$DOMAIN,prometheus-k8s-openshift-monitoring.apps.$DOMAIN -n --agree-tos -m $EMAIL
 
 # Disable the EPEL repository globally so that is not accidentally used during later steps of the installation
 sed -i -e "s/^enabled=1/enabled=0/" /etc/yum.repos.d/epel.repo
