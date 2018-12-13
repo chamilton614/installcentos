@@ -82,7 +82,8 @@ yum -y install epel-release
 yum install -y certbot
 
 #Generate SSL Cert
-certbot certonly --standalone -d console.$DOMAIN -d apps.$DOMAIN -n --agree-tos -m ${EMAIL}
+#certbot certonly --standalone -d console.$DOMAIN,apps.$DOMAIN -n --agree-tos -m $EMAIL
+certbot certonly --standalone -d $DOMAIN,console.$DOMAIN,console.apps.$DOMAIN,apps.$DOMAIN,hawkular-metrics.apps.$DOMAIN,grafana-openshift-monitoring.apps.$DOMAIN,alertmanager-main-openshift-monitoring.apps.$DOMAIN,prometheus-k8s-openshift-monitoring.apps.$DOMAIN -n --agree-tos -m $EMAIL
 
 # Disable the EPEL repository globally so that is not accidentally used during later steps of the installation
 sed -i -e "s/^enabled=1/enabled=0/" /etc/yum.repos.d/epel.repo
@@ -97,6 +98,8 @@ fi
 yum -y --enablerepo=epel install pyOpenSSL
 
 #curl -o ansible.rpm https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.6.5-1.el7.ans.noarch.rpm
+
+#Newer Ansible
 curl -o ansible.rpm https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.7.4-1.el7.ans.noarch.rpm
 yum -y --enablerepo=epel install ansible.rpm
 
@@ -201,9 +204,6 @@ fi
 # Enable the EPEL repository globally
 sed -i -e "s/^enabled=0/enabled=1/" /etc/yum.repos.d/epel.repo
 
-# Install Certbot
-#yum install -y certbot
-
 echo "******"
 echo "* Your console is https://console.$DOMAIN:$API_PORT"
 echo "* Your username is $USERNAME "
@@ -216,14 +216,3 @@ echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT
 echo "******"
 
 oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
-
-#Use the Default Project
-#oc project default
-#Scale the Router to 0
-#oc scale --replicas=0 dc router
-#Generate SSL Cert
-#certbot certonly --standalone -d console.$DOMAIN -d apps.$DOMAIN -n --agree-tos -m ${EMAIL}
-
-
-
-
