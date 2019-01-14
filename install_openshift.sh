@@ -180,8 +180,8 @@ touch /etc/origin/master/htpasswd
 #Create the logs directory
 mkdir logs
 
-ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml | tee logs/ocp_install.log 2>&1
-ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml | tee logs/ocp_install.log 2>&1
+ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml | tee logs/openshift_install.log 2>&1
+ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml | tee logs/openshift_install.log 2>&1
 
 htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
 oc adm policy add-cluster-role-to-user cluster-admin ${USERNAME}
