@@ -158,8 +158,8 @@ if [ "$memory" -lt "16200000" ]; then
 	export LOGGING="False"
 fi
 
-curl -o inventory.template $SCRIPT_REPO/inventory.ini
-envsubst < inventory.template > inventory.ini
+curl -o inventory.processed $SCRIPT_REPO/inventory.ini
+envsubst < inventory.processed > inventory.ini
 
 # add proxy in inventory.ini if proxy variables are set
 if [ ! -z "${HTTPS_PROXY:-${https_proxy:-${HTTP_PROXY:-${http_proxy}}}}" ]; then
