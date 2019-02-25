@@ -26,8 +26,6 @@ os_sdn_network_plugin_name='redhat/openshift-ovs-networkpolicy'
 
 openshift_disable_check=disk_availability,docker_storage,memory_availability,docker_image_availability
 
-openshift_node_kubelet_args={'pods-per-core': ['10']}
-
 deployment_type=origin
 openshift_deployment_type=origin
 
@@ -38,20 +36,6 @@ openshift_logging_elasticsearch_proxy_image_version="v1.0.0"
 openshift_logging_es_nodeselector={"node-role.kubernetes.io/infra":"true"}
 logging_elasticsearch_rollout_override=false
 osm_use_cockpit=true
-
-###############################
-#Added for SSL Certificate
-###############################
-#openshift_master_overwrite_named_certificates=true
-#openshift_master_named_certificates=[{"certfile": "/etc/letsencrypt/live/${DOMAIN}/cert.pem", "keyfile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem", "names": ["${DOMAIN}","console.${DOMAIN}","console.apps.${DOMAIN}","apps.${DOMAIN}","hawkular-metrics.apps.${DOMAIN}","grafana-openshift-monitoring.apps.${DOMAIN}","alertmanager-main-openshift-monitoring.apps.${DOMAIN}","prometheus-k8s-openshift-monitoring.apps.${DOMAIN}"]}]
-
-#Used for Cluster Console Cert
-#openshift_console_cert="/etc/letsencrypt/live/${DOMAIN}/cert.pem"
-
-#Used for Cluster Console Key
-#openshift_console_key="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
-
-###############################
 
 openshift_metrics_install_metrics=${METRICS}
 openshift_logging_install_logging=${LOGGING}
