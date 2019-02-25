@@ -13,6 +13,8 @@ export VERSION=${VERSION:="3.11"}
 export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/chamilton614/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
+export LETSENCRYPT=${LETSENCRYPT:="false"}
+export MAIL=${MAIL:="example@email.com"}
 
 ## Make the script interactive to set the variables
 if [ "$INTERACTIVE" = "true" ]; then
@@ -50,6 +52,25 @@ if [ "$INTERACTIVE" = "true" ]; then
 		export API_PORT="$choice";
 	fi 
 
+	echo "Do you wish to enable HTTPS with Let's Encrypt?"
+	echo "Warnings: " 
+	echo "  Let's Encrypt only works if the IP is using publicly accessible IP and custom certificates."
+	echo "  This feature doesn't work with OpenShift CLI for now."
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes) export LETSENCRYPT=true; break;;
+			No) export LETSENCRYPT=false; break;;
+			*) echo "Please select Yes or No.";;
+		esac
+	done
+	
+	if [ "$LETSENCRYPT" = true ] ; then
+		read -rp "Email(required for Let's Encrypt): ($MAIL): " choice;
+		if [ "$choice" != "" ] ; then
+			export MAIL="$choice";
+		fi
+	fi
+	
 	echo
 
 fi
@@ -59,8 +80,11 @@ echo "* Your domain is $DOMAIN "
 echo "* Your IP is $IP "
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
-echo "* Your email is $EMAIL "
 echo "* OpenShift version: $VERSION "
+echo "* Enable HTTPS with Let's Encrypt: $LETSENCRYPT "
+if [ "$LETSENCRYPT" = true ] ; then
+	echo "* Your email is $MAIL "
+fi
 echo "******"
 
 # install updates
@@ -77,13 +101,6 @@ yum install -y  wget git zile nano net-tools docker-1.13.1\
 
 #install epel
 yum -y install epel-release
-
-# Install Certbot
-#yum install -y certbot
-
-#Generate SSL Cert
-#certbot certonly --standalone -d console.$DOMAIN,apps.$DOMAIN -n --agree-tos -m $EMAIL
-#certbot certonly --standalone -d $DOMAIN,console.$DOMAIN,console.apps.$DOMAIN,apps.$DOMAIN,hawkular-metrics.apps.$DOMAIN,grafana-openshift-monitoring.apps.$DOMAIN,alertmanager-main-openshift-monitoring.apps.$DOMAIN,prometheus-k8s-openshift-monitoring.apps.$DOMAIN -n --agree-tos -m $EMAIL
 
 # Disable the EPEL repository globally so that is not accidentally used during later steps of the installation
 sed -i -e "s/^enabled=1/enabled=0/" /etc/yum.repos.d/epel.repo
@@ -173,6 +190,54 @@ if [ ! -z "${HTTPS_PROXY:-${https_proxy:-${HTTP_PROXY:-${http_proxy}}}}" ]; then
 	fi
 	echo "openshift_no_proxy=\"${__no_proxy}\"" >> inventory.ini
 fi
+
+# Let's Encrypt setup
+if [ "$LETSENCRYPT" = true ] ; then
+	# Install CertBot
+	yum install --enablerepo=epel -y certbot
+
+	# Configure Let's Encrypt certificate
+	certbot certonly --manual \
+			--preferred-challenges dns \
+			--email $MAIL \
+			--server https://acme-v02.api.letsencrypt.org/directory \
+			--agree-tos \
+			-d $DOMAIN \
+			-d *.$DOMAIN \
+			-d *.apps.$DOMAIN
+	
+	## Modify inventory.ini 
+	# Declare usage of Custom Certificate
+	# Configure Custom Certificates for the Web Console or CLI => Doesn't Work for CLI
+	# Configure a Custom Master Host Certificate
+	# Configure a Custom Wildcard Certificate for the Default Router
+	# Configure a Custom Certificate for the Image Registry
+	## See here for more explanation: https://docs.okd.io/latest/install_config/certificate_customization.html
+	cat <<EOT >> inventory.ini
+	
+	openshift_master_overwrite_named_certificates=true
+	
+	openshift_master_cluster_hostname=console-internal.${DOMAIN}
+	openshift_master_cluster_public_hostname=console.${DOMAIN}
+	
+	openshift_master_named_certificates=[{"certfile": "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem", "keyfile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem", "cafile": "/etc/letsencrypt/live/${DOMAIN}/chain.pem", "names": ["console.${DOMAIN}"]}]
+	
+	openshift_hosted_router_certificate={"certfile": "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem", "keyfile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem", "cafile": "/etc/letsencrypt/live/${DOMAIN}/chain.pem"}
+	
+	openshift_hosted_registry_routehost=registry.apps.${DOMAIN}
+	openshift_hosted_registry_routecertificates={"certfile": "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem", "keyfile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem", "cafile": "/etc/letsencrypt/live/${DOMAIN}/chain.pem"}
+	openshift_hosted_registry_routetermination=reencrypt
+EOT
+	
+	# Add Cron Task to renew certificate
+	echo "@weekly  certbot renew --pre-hook=\"oc scale --replicas=0 dc router\" --post-hook=\"oc scale --replicas=1 dc router\"" > certbotcron
+	crontab certbotcron
+	rm certbotcron
+fi
+
+#Generate SSL Cert
+#certbot certonly --standalone -d console.$DOMAIN,apps.$DOMAIN -n --agree-tos -m $EMAIL
+#certbot certonly --standalone -d $DOMAIN,console.$DOMAIN,console.apps.$DOMAIN,apps.$DOMAIN,hawkular-metrics.apps.$DOMAIN,grafana-openshift-monitoring.apps.$DOMAIN,alertmanager-main-openshift-monitoring.apps.$DOMAIN,prometheus-k8s-openshift-monitoring.apps.$DOMAIN -n --agree-tos -m $EMAIL
 
 mkdir -p /etc/origin/master/
 touch /etc/origin/master/htpasswd
