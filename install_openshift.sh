@@ -76,6 +76,7 @@ if [ "$INTERACTIVE" = "true" ]; then
 fi
 
 echo "******"
+echo "* Your hostname is $(hostname) "
 echo "* Your domain is $DOMAIN "
 echo "* Your IP is $IP "
 echo "* Your username is $USERNAME "
@@ -128,7 +129,8 @@ cd openshift-ansible && git fetch && git checkout release-${VERSION} && cd ..
 cat <<EOD > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-${IP}		$(hostname) console console.${DOMAIN}  
+#${IP}		$(hostname) console console.${DOMAIN}
+#${IP}		$(hostname) console.${DOMAIN} console.apps.${DOMAIN}
 EOD
 
 if [ -z $DISK ]; then 
@@ -274,14 +276,17 @@ fi
 sed -i -e "s/^enabled=0/enabled=1/" /etc/yum.repos.d/epel.repo
 
 echo "******"
-echo "* Your console is https://console.$DOMAIN:$API_PORT"
+#echo "* Your console is https://console.$DOMAIN:$API_PORT"
+echo "* Your console is https://$(hostname):$API_PORT"
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
 echo "* Your email is $EMAIL "
 echo "*"
 echo "* Login using:"
 echo "*"
-echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/"
+#echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/"
+echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://$(hostname):$API_PORT/"
 echo "******"
 
-oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
+#oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
+oc login -u ${USERNAME} -p ${PASSWORD} https://$(hostname):$API_PORT/
