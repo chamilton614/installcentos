@@ -72,6 +72,18 @@ if [ "$INTERACTIVE" = "true" ]; then
 		fi
 	fi
 	
+	echo "Do you wish to use the hostname (ex. okdtest.somedomain.com) or IP.nip.io for the Console URL?"
+	echo "Example with hostname: https://okdtest.somedomain.com:8443"
+	echo "Example with nip.io:   https://1.2.3.4.nip.io:8443"
+	echo "TIP: If the Server is not registered with DNS, then choose nip.io option."
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes) echo "Use Hostname"; export HOSTNAME=$(hostname); break;;
+			No) echo "Use nip.io"; export HOSTNAME=$DOMAIN; break;;
+			*) echo "Please select Yes or No.";;
+		esac
+	done
+	
 	echo
 
 fi
@@ -285,7 +297,7 @@ sed -i -e "s/^enabled=0/enabled=1/" /etc/yum.repos.d/epel.repo
 
 echo "******"
 #echo "* Your console is https://console.$DOMAIN:$API_PORT"
-echo "* Your console is https://$(hostname):$API_PORT"
+echo "* Your console is https://$HOSTNAME:$API_PORT"
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
 echo "* Your email is $EMAIL "
@@ -293,8 +305,8 @@ echo "*"
 echo "* Login using:"
 echo "*"
 #echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/"
-echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://$(hostname):$API_PORT/"
+echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://$HOSTNAME:$API_PORT/"
 echo "******"
 
 #oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
-oc login -u ${USERNAME} -p ${PASSWORD} https://$(hostname):$API_PORT/
+oc login -u ${USERNAME} -p ${PASSWORD} https://$HOSTNAME:$API_PORT/
