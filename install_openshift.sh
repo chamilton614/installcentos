@@ -76,7 +76,7 @@ if [ "$INTERACTIVE" = "true" ]; then
 
 fi
 
-echo "******"
+echo "*****************************************************"
 echo "* Your hostname is $(hostname) "
 echo "* Your domain is $DOMAIN "
 echo "* Your IP is $IP "
@@ -87,7 +87,7 @@ echo "* Enable HTTPS with Let's Encrypt: $LETSENCRYPT "
 if [ "$LETSENCRYPT" = true ] ; then
 	echo "* Your email is $MAIL "
 fi
-echo "******"
+echo "*****************************************************"
 
 # install updates
 yum update -y
@@ -242,8 +242,15 @@ fi
 #certbot certonly --standalone -d console.$DOMAIN,apps.$DOMAIN -n --agree-tos -m $EMAIL
 #certbot certonly --standalone -d $DOMAIN,console.$DOMAIN,console.apps.$DOMAIN,apps.$DOMAIN,hawkular-metrics.apps.$DOMAIN,grafana-openshift-monitoring.apps.$DOMAIN,alertmanager-main-openshift-monitoring.apps.$DOMAIN,prometheus-k8s-openshift-monitoring.apps.$DOMAIN -n --agree-tos -m $EMAIL
 
-mkdir -p /etc/origin/master/
-touch /etc/origin/master/htpasswd
+#Create the Origin Master directory
+if [ ! -d "/etc/origin/master/" ]; then
+	mkdir -p /etc/origin/master/
+fi
+
+#Create the htpasswd file
+if [ ! -f "/etc/origin/master/htpasswd" ]; then
+	touch /etc/origin/master/htpasswd
+fi
 
 #Create the logs directory
 mkdir logs

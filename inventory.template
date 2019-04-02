@@ -54,7 +54,8 @@ openshift_master_cluster_public_hostname=${HOSTNAME}
 openshift_master_default_subdomain=apps.${DOMAIN}
 
 #Used for Cluster Console - defaults to console.<openshift_master_default_subdomain>
-openshift_console_hostname=console.apps.${DOMAIN}
+#openshift_console_hostname=console.apps.${DOMAIN}
+openshift_console_hostname=${HOSTNAME}
 
 openshift_master_api_port=${API_PORT}
 openshift_master_console_port=${API_PORT}
