@@ -1,7 +1,7 @@
 ---
 - name: Run the uninstall playbook
   #import_playbook: /usr/share/ansible/openshift-ansible/playbooks/adhoc/uninstall.yml
-  import_playbook: openshift-ansible/playbooks/adhoc/uninstall.yml
+  import_playbook: ./../openshift-ansible/playbooks/adhoc/uninstall.yml
   
 - name: Remove leftover content
   hosts: nodes
