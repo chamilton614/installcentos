@@ -177,7 +177,12 @@ export LOGGING="True"
 
 memory=$(cat /proc/meminfo | grep MemTotal | sed "s/MemTotal:[ ]*\([0-9]*\) kB/\1/")
 
-if [ "$memory" -lt "4194304" ]; then
+#if [ "$memory" -lt "4194304" ]; then
+#	export METRICS="False"
+#fi
+
+#Check for 32400000 (32GB RAM) to allow Metrics to be installed
+if [ "$memory" -lt "32400000" ]; then
 	export METRICS="False"
 fi
 
@@ -185,8 +190,8 @@ fi
 #	export LOGGING="False"
 #fi
 
-#Updated to use 16200000 to force install logging
-if [ "$memory" -lt "16200000" ]; then
+#Check for 4194304 (4GB RAM) to force Logging to be installed
+if [ "$memory" -lt "4194304" ]; then
 	export LOGGING="False"
 fi
 
