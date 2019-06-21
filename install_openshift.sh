@@ -105,7 +105,7 @@ echo "*****************************************************"
 yum update -y
 
 # install the following base packages
-yum install -y  wget git zile nano net-tools docker-1.13.1\
+yum install -y  vim wget git zile nano net-tools docker-1.13.1\
 				bind-utils iptables-services \
 				bridge-utils bash-completion \
 				kexec-tools sos psacct openssl-devel \
@@ -272,7 +272,14 @@ fi
 #Create the logs directory
 mkdir logs
 
+echo "==================================="
+echo "Running the Prerequisites Playbook"
+echo "==================================="
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/prerequisites.yml | tee logs/openshift_install.log 2>&1
+
+echo "==================================="
+echo "Running the Deploy Cluster Playbook"
+echo "==================================="
 ansible-playbook -i inventory.ini openshift-ansible/playbooks/deploy_cluster.yml | tee logs/openshift_install.log 2>&1
 
 htpasswd -b /etc/origin/master/htpasswd ${USERNAME} ${PASSWORD}
