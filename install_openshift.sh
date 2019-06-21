@@ -142,8 +142,8 @@ cd openshift-ansible && git fetch && git checkout release-${VERSION} && cd ..
 cat <<EOD > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-${IP}		$(hostname) console console.${DOMAIN}
-${IP}		$(hostname) console.${DOMAIN} console.apps.${DOMAIN}
+#${IP}		$(hostname) console console.${DOMAIN}
+#${IP}		$(hostname) console.${DOMAIN} console.apps.${DOMAIN}
 EOD
 
 if [ -z $DISK ]; then 
