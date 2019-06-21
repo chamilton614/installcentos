@@ -15,10 +15,13 @@
     - name: Remove /srv/nfs/*
       command: "rm -rf /srv/nfs/*"
       
-- name: Remove Localhost Persistent Volume policy files
+- name: Remove Localhost Volumes and Persistent Volume policy files
   hosts: localhost
   connection: local
   tasks:
+    - name: Remove /mnt/data/vols
+      command: "rm -rf /mnt/data/vol*"
+      
     - name: Remove /root/pvs
       command: "rm -rf /root/pvs"
 
